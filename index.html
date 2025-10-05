@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A Quiet Confession</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-veil: rgba(0,0,0,0.70); /* 70% black overlay */
+      --gold: #d4a24a;
+      --ivory: #fff9f0;
+      --muted: rgba(255,255,255,0.85);
+      --soft-shadow: 0 18px 50px rgba(0,0,0,0.5);
+      --max-width: 980px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      color:var(--ivory);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background: #000;
+      overflow:hidden;
+    }
+
+    /* video background */
+    .bg-video {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      overflow:hidden;
+    }
+    .bg-video video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transform: scale(1.03); /* slight scale for cinematic feel */
+      filter: saturate(0.9) contrast(0.95);
+    }
+
+    /* dark veil overlay (70% black) */
+    .veil {
+      position:fixed;
+      inset:0;
+      background: var(--bg-veil);
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      backdrop-filter: blur(6px) brightness(0.9);
+    }
+
+    /* container for content */
+    .stage{
+      width:100%;
+      max-width:var(--max-width);
+      text-align:center;
+      padding:48px 24px;
+      margin:0 auto;
+      position:relative;
+      z-index:2;
+    }
+
+    /* cinematic card */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius:14px;
+      padding:40px 30px;
+      box-shadow:var(--soft-shadow);
+      display:inline-block;
+      min-width:320px;
+      max-width:900px;
+      width:100%;
+      backdrop-filter: blur(4px);
+    }
+
+    .title {
+      font-family: 'Great Vibes', cursive;
+      font-size:56px;
+      line-height:0.95;
+      margin:0 0 6px 0;
+      color:var(--gold);
+      text-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      letter-spacing:0.6px;
+    }
+
+    .subtitle {
+      margin:0 0 20px 0;
+      color:var(--muted);
+      font-weight:300;
+      font-size:16px;
+      letter-spacing:0.3px;
+    }
+
+    /* typewriter/confession */
+    .confession {
+      font-size:20px;
+      line-height:1.6;
+      color:var(--muted);
+      max-width:860px;
+      margin: 14px auto 24px auto;
+      min-height:120px;
+      white-space:pre-wrap;
+      font-weight:500;
+    }
+
+    .confession .cursor {
+      display:inline-block;
+      width:2px;
+      height:1.12em;
+      background:var(--ivory);
+      margin-left:6px;
+      vertical-align:middle;
+      animation: blink 1s steps(2) infinite;
+      opacity:0.95;
+    }
+    @keyframes blink { 50% { opacity:0 } }
+
+    /* reveal button */
+    .reveal {
+      margin-top:20px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn {
+      background:transparent;
+      border:2px solid rgba(212,162,74,0.14);
+      color:var(--ivory);
+      padding:12px 20px;
+      border-radius:10px;
+      font-weight:600;
+      letter-spacing:0.6px;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      backdrop-filter: blur(3px);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(212,162,74,0.14), rgba(212,162,74,0.06));
+      border-color: rgba(212,162,74,0.28);
+      box-shadow: 0 12px 30px rgba(212,162,74,0.06);
+    }
+    .btn:active{ transform: translateY(1px) scale(.998); }
+
+    /* final proposal styling */
+    .proposal {
+      margin-top:18px;
+      font-family: 'Great Vibes', cursive;
+      font-size:44px;
+      color:var(--gold);
+      opacity:0;
+      transform: translateY(8px) scale(.998);
+      transition: all 420ms cubic-bezier(.2,.8,.2,1);
+      text-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .proposal.show { opacity:1; transform: translateY(0) scale(1); }
+
+    /* small caption */
+    .note {
+      margin-top:10px;
+      font-size:13px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    /* responsive */
+    @media (max-width:600px){
+      .card{ padding:28px 18px; }
+      .title{ font-size:36px; }
+      .confession{ font-size:16px; min-height:110px; }
+      .proposal{ font-size:34px }
+    }
+    /* accessibility focus */
+    :focus { outline: 3px solid rgba(212,162,74,0.18); outline-offset:4px; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <!-- Background video (replace source with your cozy fireplace video) -->
+  <div class="bg-video" aria-hidden="true">
+    <video id="bgVideo" autoplay muted playsinline loop>
+      <source src="assets/fireplace.mp4" type="video/mp4">
+      <!-- Fallback image if video not available -->
+      <img src="assets/fireplace.jpg" alt="Cozy fireplace" style="width:100%;height:100%;object-fit:cover;">
+    </video>
+  </div>
+
+  <!-- 70% black veil overlay -->
+  <div class="veil" role="main" aria-labelledby="pageTitle">
+    <div class="stage">
+      <div class="card" role="article" aria-live="polite">
+        <h1 id="pageTitle" class="title">Tonight, I sing for you</h1>
+        <p class="subtitle">A quiet confession beneath the hush of the flames — words that come slowly and from the heart.</p>
+
+        <!-- typewriter confessional text -->
+        <div id="confession" class="confession" aria-atomic="true" aria-live="polite"></div>
+
+        <!-- controls -->
+        <div class="reveal" aria-hidden="false">
+          <button id="playAudio" class="btn primary" aria-pressed="false">Play Ambience</button>
+          <button id="revealBtn" class="btn" disabled>Reveal the Promise</button>
+        </div>
+
+        <div id="proposal" class="proposal" aria-hidden="true">Will you marry me?</div>
+        <p class="note">Tip: Tap anywhere to start audio if it doesn't play automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- optional ambient music (replace with your instrumental / guitar piece) -->
+  <audio id="ambient" loop preload="auto">
+    <source src="assets/ambient.mp3" type="audio/mpeg">
+    <!-- no text fallback necessary -->
+  </audio>
+
+  <script>
+    // === cinematic confession content ===
+    const confessionText = [
+`My beloved,
+
+There are nights when the world grows quiet enough
+for the heart to speak its truth in a single breath.
+
+I have wandered many roads, learned many songs,
+but every melody I remember leads to you.
+When I close my eyes I find your laughter like a warm light,
+and in that light, all my hours become softer.
+
+Tonight, by the whisper of the flame,
+I offer you the simplest promise I can make:
+to stand beside you in every small dawn and every slow dusk,
+to learn the map of your hands, and keep them gently.
+
+If you will let me, I will spend my days
+turning ordinary moments into a lifetime of tenderness.
+`
+    ];
+
+    // final line to reveal
+    const finalPromise = "Will you marry me?";
+
+    // --- Typewriter logic (slow, cinematic) ---
+    const confessionEl = document.getElementById('confession');
+    const revealBtn = document.getElementById('revealBtn');
+    const proposalEl = document.getElementById('proposal');
+    const ambient = document.getElementById('ambient');
+    const playAudioBtn = document.getElementById('playAudio');
+    const bgVideo = document.getElementById('bgVideo');
+
+    // function to attempt playing audio after user gesture (avoids autoplay block)
+    function startAmbient(){
+      if(!ambient) return;
+      ambient.play().catch(()=>{ /* ignore autoplay block; user can click button */ });
+      playAudioBtn.setAttribute('aria-pressed','true');
+    }
+
+    // show text with typewriter, returns a promise resolved when finished
+    function typeWriter(text, target, speed = 28){
+      return new Promise(resolve => {
+        target.textContent = '';
+        let i = 0;
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        target.appendChild(cursor);
+
+        function step(){
+          if(i >= text.length){
+            cursor.remove();
+            resolve();
+            return;
+          }
+          // insert character before cursor
+          const char = text[i++];
+          // preserve existing content nodes — keep last text node or create
+          const last = target.childNodes[target.childNodes.length - 1];
+          if(!last || last.nodeType !== Node.TEXT_NODE){
+            target.insertBefore(document.createTextNode(''), cursor);
+          }
+          target.childNodes[target.childNodes.length - 1].textContent += char;
+          // gentle speed variance
+          const variance = Math.random() * 40 - 8;
+          let delay = speed + variance;
+          // punctuation pause for cinematic effect
+          if(/[.,—:;!?]/.test(char)) delay += 220 + Math.random()*160;
+          setTimeout(step, Math.max(12, delay));
+        }
+        step();
+      });
+    }
+
+    // sequence controller
+    async function startConfessionSequence(){
+      // ensure audio attempt
+      startAmbient();
+      // play a gentle slow zoom on the video (css transform done inline)
+      bgVideo.style.transition = 'transform 18s ease';
+      bgVideo.style.transform = 'scale(1.06)';
+
+      // type all paragraphs (we have one string; could split by newlines for pauses)
+      const text = confessionText.join('\n\n');
+      await typeWriter(text, confessionEl, 30);
+
+      // small pause then enable reveal
+      setTimeout(()=> {
+        revealBtn.disabled = false;
+        revealBtn.focus();
+      }, 700);
+    }
+
+    // user interactions
+    document.addEventListener('click', function anyClickOnce(e){
+      // first user interaction triggers audio/video attempts (if not already playing)
+      try { startAmbient(); } catch(e){}
+      // remove this handler so it doesn't repeat
+      document.removeEventListener('click', anyClickOnce);
+    });
+
+    // Play ambience button
+    playAudioBtn.addEventListener('click', () => {
+      try {
+        if(ambient.paused) { ambient.play(); playAudioBtn.textContent = 'Pause Ambience'; playAudioBtn.setAttribute('aria-pressed','true'); }
+        else { ambient.pause(); playAudioBtn.textContent = 'Play Ambience'; playAudioBtn.setAttribute('aria-pressed','false'); }
+      } catch(e){}
+    });
+
+    // reveal button triggers the final proposal reveal with gentle flourish
+    revealBtn.addEventListener('click', async () => {
+      revealBtn.disabled = true;
+      // subtle flourish: slow fade in a last line then show proposal
+      await typeWriter('\n\nAnd so, with all the music I have learnt, with all my days ahead —\n', confessionEl, 32);
+      // small delay
+      setTimeout(() => {
+        proposalEl.classList.add('show');
+        proposalEl.setAttribute('aria-hidden','false');
+        // gentle audio cue using WebAudio (short bell) for moment (no external audio)
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 440;
+          g.gain.value = 0.0001;
+          g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.1);
+          o.connect(g); g.connect(ctx.destination);
+          o.start();
+          o.stop(ctx.currentTime + 1.1);
+        } catch(e){}
+      }, 480);
+    });
+
+    // start sequence on load (will attempt audio but will not force play if blocked)
+    window.addEventListener('load', () => {
+      // small entrance fade
+      document.querySelector('.card').style.opacity = '0';
+      document.querySelector('.card').style.transform = 'translateY(8px)';
+      setTimeout(()=> {
+        document.querySelector('.card').style.transition = 'all 620ms cubic-bezier(.2,.8,.2,1)';
+        document.querySelector('.card').style.opacity = '1';
+        document.querySelector('.card').style.transform = 'translateY(0)';
+      }, 150);
+      startConfessionSequence();
+    });
+  </script>
+</body>
+</html>
