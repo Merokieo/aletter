@@ -81,6 +81,9 @@
       max-width:900px;
       width:100%;
       backdrop-filter: blur(4px);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 620ms cubic-bezier(.2,.8,.2,1);
     }
 
     .title {
@@ -125,7 +128,7 @@
     }
     @keyframes blink { 50% { opacity:0 } }
 
-    /* reveal button */
+    /* reveal button wrapper */
     .reveal {
       margin-top:20px;
       display:flex;
@@ -154,7 +157,8 @@
 
     /* final proposal styling */
     .proposal {
-      margin-top:18px;
+      margin-top:28px;
+      padding: 24px 0 12px 0;
       font-family: 'Great Vibes', cursive;
       font-size:44px;
       color:var(--gold);
@@ -162,8 +166,13 @@
       transform: translateY(8px) scale(.998);
       transition: all 420ms cubic-bezier(.2,.8,.2,1);
       text-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      pointer-events: none; /* do not interact until shown */
     }
-    .proposal.show { opacity:1; transform: translateY(0) scale(1); }
+    .proposal.show {
+      opacity:1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
 
     /* small caption */
     .note {
@@ -174,10 +183,11 @@
 
     /* responsive */
     @media (max-width:600px){
-      .card{ padding:28px 18px; }
+      .card{ padding:28px 8px; }
       .title{ font-size:36px; }
       .confession{ font-size:16px; min-height:110px; }
-      .proposal{ font-size:34px }
+      .proposal{ font-size:34px; padding:18px 0 8px 0; }
+      .reveal { gap:8px; }
     }
     /* accessibility focus */
     :focus { outline: 3px solid rgba(212,162,74,0.18); outline-offset:4px; border-radius:8px; }
@@ -206,10 +216,10 @@
         <!-- controls -->
         <div class="reveal" aria-hidden="false">
           <button id="playAudio" class="btn primary" aria-pressed="false">Play Ambience</button>
-          <button id="revealBtn" class="btn" disabled>Reveal the Promise</button>
+          <button id="revealBtn" class="btn" disabled style="visibility:hidden;">Reveal the Promise</button>
         </div>
 
-        <div id="proposal" class="proposal" aria-hidden="true">Will you marry me?</div>
+        <div id="proposal" class="proposal" aria-hidden="true">Will you marry me, Ghita?</div>
         <p class="note">Tip: Tap anywhere to start audio if it doesn't play automatically.</p>
       </div>
     </div>
@@ -224,7 +234,7 @@
   <script>
     // === cinematic confession content ===
     const confessionText = [
-`My beloved,
+`Sweetheart Ghita,
 
 There are nights when the world grows quiet enough
 for the heart to speak its truth in a single breath.
@@ -239,13 +249,13 @@ I offer you the simplest promise I can make:
 to stand beside you in every small dawn and every slow dusk,
 to learn the map of your hands, and keep them gently.
 
-If you will let me, I will spend my days
-turning ordinary moments into a lifetime of tenderness.
-`
+If you will let me, darling,
+I will spend my days turning ordinary moments
+into a lifetime of tenderness.`
     ];
 
     // final line to reveal
-    const finalPromise = "Will you marry me?";
+    const finalPromise = "Will you marry me, Ghita?";
 
     // --- Typewriter logic (slow, cinematic) ---
     const confessionEl = document.getElementById('confession');
@@ -311,6 +321,7 @@ turning ordinary moments into a lifetime of tenderness.
       // small pause then enable reveal
       setTimeout(()=> {
         revealBtn.disabled = false;
+        revealBtn.style.visibility = 'visible';
         revealBtn.focus();
       }, 700);
     }
@@ -334,6 +345,7 @@ turning ordinary moments into a lifetime of tenderness.
     // reveal button triggers the final proposal reveal with gentle flourish
     revealBtn.addEventListener('click', async () => {
       revealBtn.disabled = true;
+      revealBtn.style.visibility = 'hidden';
       // subtle flourish: slow fade in a last line then show proposal
       await typeWriter('\n\nAnd so, with all the music I have learnt, with all my days ahead —\n', confessionEl, 32);
       // small delay
@@ -360,12 +372,12 @@ turning ordinary moments into a lifetime of tenderness.
     // start sequence on load (will attempt audio but will not force play if blocked)
     window.addEventListener('load', () => {
       // small entrance fade
-      document.querySelector('.card').style.opacity = '0';
-      document.querySelector('.card').style.transform = 'translateY(8px)';
+      const card = document.querySelector('.card');
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(8px)';
       setTimeout(()=> {
-        document.querySelector('.card').style.transition = 'all 620ms cubic-bezier(.2,.8,.2,1)';
-        document.querySelector('.card').style.opacity = '1';
-        document.querySelector('.card').style.transform = 'translateY(0)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
       }, 150);
       startConfessionSequence();
     });
